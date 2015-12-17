@@ -1,5 +1,6 @@
 package org.loop.example
 
+import android.app.Activity
 import android.location.LocationManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -7,6 +8,12 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.activity_main.textView
+import org.jetbrains.anko.AnkoContext
+import org.jetbrains.anko.verticalLayout
+import org.loop.example.components.counter.Counter
+import org.loop.example.components.counter.CounterView
+import org.loop.example.components.counter_pair.Counter_Pair
+import org.loop.example.components.counter_pair.Counter_PairView
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -25,10 +32,16 @@ public class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        dispatch(this)
+        val counterView = CounterView(Counter.Model(), dispatch)
+
+        verticalLayout {
+            counterView.
+        }
+/*        setContentView(R.layout.activity_main)
         MyApplication.graph.inject(this)
         assert(textView != null)
-        Log.d(TAG, "$something and $somethingElse")
+        Log.d(TAG, "$something and $somethingElse")*/
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -51,4 +64,15 @@ public class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    fun dispatch(activity: Activity, action: Counter.Action = Counter.Action.INIT, model: Counter.Model = Counter.Model()) {
+        val updatedModel = Counter.update(action, model)
+        val dispatch = dispatch(activity, updatedModel)
+
+        activity.setContentView(CounterView(updatedModel, dispatch).createView(AnkoContext.createReusable(activity)))
+        //activity.setContentView(Counter_Pair.view(activity, updatedModel, dispatch))
+    }
+
+    fun dispatch(activity: Activity, model: Counter.Model) = { newAction: Counter.Action ->
+        dispatch(activity, newAction, model)
+    }
 }
