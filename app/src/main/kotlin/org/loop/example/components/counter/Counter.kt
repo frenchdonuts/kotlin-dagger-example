@@ -9,8 +9,6 @@ import org.jetbrains.anko.*
  */
 class Counter {
     sealed class Action {
-        object INIT : Action()
-
         object UP : Action()
 
         object DOWN : Action()
@@ -21,7 +19,6 @@ class Counter {
     companion object {
         fun update(action: Action, model: Model): Model {
             return when (action) {
-                is Action.INIT -> Model()
                 is Action.UP -> Model(model.counter + 1)
                 is Action.DOWN -> Model(model.counter - 1)
             }

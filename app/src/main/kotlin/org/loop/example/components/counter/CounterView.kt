@@ -1,12 +1,16 @@
 package org.loop.example.components.counter
 
 import android.content.Context
-import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.View
 import android.view.ViewManager
 import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.TextView
 import org.jetbrains.anko.*
 import org.jetbrains.anko.custom.ankoView
+import rx.Observable
+import rx.subjects.PublishSubject
 
 /**
  * Created by pamelactan on 12/15/15.
@@ -25,20 +29,47 @@ import org.jetbrains.anko.custom.ankoView
 
 // I need to create a class that extends a ViewGroup, THEN set the corresponding AnkoComponent as its UI
 // Which view lifecycle callback do I use?
-class CounterView(context: Context, val model: Counter.Model, val dispatch: (Counter.Action) -> Unit) : FrameLayout(context) {
+
+// Is there any advantage to using Observable<Counter.Model> vs just having the parent view call this view's render function?
+//   Yes. There is. It delegates the rendering WHOLLY to this view. What if the parent view "forgets" to call this view's render function?
+//   This way, the parent view cannot fuck up. And this way, this view's constructor defines a CONTRACT that requires that it gets a MODEL
+//   THAT CHANGES OVER TIME.
+//   In the end, this just puts less cognitive load on the user of this module. The user only has to know how the constructor works.
+//   Nothing else
+//   Also, I think it is just more semantically honest
+class CounterView(context: Context,
+                  val modelO: Observable<Counter.Model>,
+                  val actionsS: PublishSubject<Counter.Action>) : LinearLayout(context) {
+    val TAG = CounterView::class.java.simpleName;
     // How do I get references to the views I create in CounterViewUI?
     //   Hmmm...getters and setters in CounterViewUI?
     // How do I make it so that I don't double-nest unnecessary ViewGroups? (This view, and CounterViewUI's verticalLayout)
 
+    // Define UI
+    private lateinit var tvCounter: TextView
     private fun init() = AnkoContext.createDelegate(this).apply {
-        CounterViewUI(model, dispatch).createView(this)
+        button("Up") {
+            onClick {
+                actionsS.onNext(Counter.Action.UP)
+            }
+        }
+        button("Down") {
+            onClick {
+                actionsS.onNext(Counter.Action.DOWN)
+            }
+        }
+        tvCounter = textView("")
     }
+
     init {
         init()
+        modelO.subscribe {
+            tvCounter.text = it.counter.toString()
+        }
     }
  }
 
-class CounterViewUI(val model: Counter.Model, val dispatch: (Counter.Action) -> Unit): AnkoComponent<CounterView> {
+/*class CounterViewUI(val model: Counter.Model, val dispatch: (Counter.Action) -> Unit): AnkoComponent<CounterView> {
     override fun createView(ui: AnkoContext<CounterView>): View = ui.apply {
         verticalLayout {
                 button("Up") {
@@ -50,9 +81,9 @@ class CounterViewUI(val model: Counter.Model, val dispatch: (Counter.Action) -> 
                 textView(model.counter.toString())
             }
         }.view
-}
+}*/
 
-public inline fun ViewManager.counterView(model: Counter.Model, noinline dispatch: (Counter.Action) -> Unit, init: CounterView.() -> Unit): CounterView {
-    return ankoView({ CounterView(it, model, dispatch) }, init)
+public inline fun ViewManager.counterView(modelO: Observable<Counter.Model>, actionsS: PublishSubject<Counter.Action>, init: CounterView.() -> Unit): CounterView {
+    return ankoView({ CounterView(it, modelO, actionsS) }, init)
 }
 
