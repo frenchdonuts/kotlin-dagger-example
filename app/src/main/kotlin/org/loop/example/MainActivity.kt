@@ -1,26 +1,14 @@
 package org.loop.example
 
-import android.app.Activity
-import android.location.LocationManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import kotlinx.android.synthetic.activity_main.textView
-import org.jetbrains.anko.AnkoContext
-import org.jetbrains.anko.textView
 import org.jetbrains.anko.verticalLayout
-import org.loop.example.components.counter.Counter
-import org.loop.example.components.counter.CounterView
-import org.loop.example.components.counter.counterView
-import org.loop.example.components.counter_pair.Counter_Pair
-import org.loop.example.components.counter_pair.Counter_PairView
-import org.loop.example.components.counter_pair.counterPairView
+import org.loop.example.components.counterView
+import org.loop.example.components.counterPairView
 import rx.subjects.PublishSubject
-import rx.subjects.Subject
-import javax.inject.Inject
-import javax.inject.Named
 
 public class MainActivity : AppCompatActivity() {
 

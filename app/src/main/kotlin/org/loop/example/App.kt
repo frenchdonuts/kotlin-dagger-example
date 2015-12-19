@@ -1,7 +1,7 @@
 package org.loop.example
 
-import org.loop.example.components.counter.Counter
-import org.loop.example.components.counter_pair.Counter_Pair
+import org.loop.example.components.Counter
+import org.loop.example.components.Counter_Pair
 
 /**
  * Created by pamelactan on 12/16/15.
