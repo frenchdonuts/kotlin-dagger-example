@@ -38,28 +38,27 @@ public class MainActivity : AppCompatActivity() {
     lateinit var actionSubject: PublishSubject<App.Action>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //dispatch(this)
-
-    actionSubject = PublishSubject.create()
-    val modelO = actionSubject.startWith(App.Action.Id)
-                              .scan(App.Model(), { model, action -> App.update(action, model) })
-                              .cache(1)  // Do we need this?
-                              .doOnNext { Log.i(TAG, "model: " + it.toString()) }
 
         // TODO: Restore state on rotation
         // Possible sln:
         //   Have App.Model(and all other *.Model's) implement Parcelable (AutoParcel)
         //   and bundle/unbundle them the normal way
+        actionSubject = PublishSubject.create()
+        val modelO = actionSubject.startWith(App.Action.Id)
+                                  .scan(App.Model(), { model, action -> App.update(action, model) })
+                                  .cache(1)  // Do we need this?
+                                  .doOnNext { Log.i(TAG, "model: " + it.toString()) }
+
+
         setContentView(
                 verticalLayout {
-                    textView("hey")
                     counterView(
                             modelO.map { appModel -> appModel.counter },
-                            actionSubject.contramap({ a -> App.Action.Counter(a) }), {})
+                            actionSubject.contramap({ a -> App.Action.counter(a) }), {})
 
                     counterPairView(
                             modelO.map { appModel -> appModel.counterPair },
-                            actionSubject.contramap({ a -> App.Action.Counter_Pair(a) }), {})
+                            actionSubject.contramap({ a -> App.Action.counterPair(a) }), {})
                 }
         )
 /*
@@ -88,16 +87,4 @@ public class MainActivity : AppCompatActivity() {
 
         return super.onOptionsItemSelected(item)
     }
-
-/*    fun dispatch(activity: Activity, action: Counter.Action = Counter.Action.INIT, model: Counter.Model = Counter.Model()) {
-        val updatedModel = Counter.update(action, model)
-        val dispatch = dispatch(activity, updatedModel)
-
-        activity.setContentView(CounterView(updatedModel, dispatch).createView(AnkoContext.createReusable(activity)))
-        //activity.setContentView(Counter_Pair.view(activity, updatedModel, dispatch))
-    }
-
-    fun dispatch(activity: Activity, model: Counter.Model) = { newAction: Counter.Action ->
-        dispatch(activity, newAction, model)
-    }*/
 }

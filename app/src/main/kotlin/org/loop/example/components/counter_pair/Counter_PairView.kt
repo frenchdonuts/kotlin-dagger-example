@@ -1,12 +1,10 @@
 package org.loop.example.components.counter_pair
 
 import android.content.Context
-import android.view.View
 import android.view.ViewManager
 import android.widget.LinearLayout
-import org.jetbrains.anko.*
+import org.jetbrains.anko.AnkoContext
 import org.jetbrains.anko.custom.ankoView
-import org.loop.example.components.counter.CounterView
 import org.loop.example.components.counter.counterView
 import org.loop.example.contramap
 import rx.Observable
@@ -29,6 +27,10 @@ class Counter_PairView(context: Context,
                 modelO.map { it.botCounter },
                 actionsS.contramap({ a -> Counter_Pair.Action.Bot(a) }),
                 {})
+    }
+
+    init {
+        init()
     }
 }
 

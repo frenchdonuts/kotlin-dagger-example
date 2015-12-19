@@ -69,7 +69,7 @@ class CounterView(context: Context,
     }
  }
 
-/*class CounterViewUI(val model: Counter.Model, val dispatch: (Counter.Action) -> Unit): AnkoComponent<CounterView> {
+class CounterViewUI(val model: Counter.Model, val dispatch: (Counter.Action) -> Unit): AnkoComponent<CounterView> {
     override fun createView(ui: AnkoContext<CounterView>): View = ui.apply {
         verticalLayout {
                 button("Up") {
@@ -81,9 +81,11 @@ class CounterView(context: Context,
                 textView(model.counter.toString())
             }
         }.view
-}*/
+}
 
-public inline fun ViewManager.counterView(modelO: Observable<Counter.Model>, actionsS: PublishSubject<Counter.Action>, init: CounterView.() -> Unit): CounterView {
+public inline fun ViewManager.counterView(modelO: Observable<Counter.Model>,
+                                          actionsS: PublishSubject<Counter.Action>,
+                                          init: CounterView.() -> Unit): CounterView {
     return ankoView({ CounterView(it, modelO, actionsS) }, init)
 }
 
