@@ -6,6 +6,8 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import org.jetbrains.anko.verticalLayout
+import org.loop.example.components.CounterList
+import org.loop.example.components.counterListView
 import org.loop.example.components.counterView
 import org.loop.example.components.counterPairView
 import rx.subjects.PublishSubject
@@ -36,17 +38,23 @@ public class MainActivity : AppCompatActivity() {
                                   .scan(App.Model(), { model, action -> App.update(action, model) })
                                   .cache(1)  // Do we need this?
                                   .doOnNext { Log.i(TAG, "model: " + it.toString()) }
+        // ^ Should our RecyclerView.Adapter have a little engine inside running like this?
+        // The problem is that the Adapter needs to know specific Actions sometimes
 
 
         setContentView(
                 verticalLayout {
                     counterView(
                             modelO.map { appModel -> appModel.counter },
-                            actionSubject.contramap({ a -> App.Action.counter(a) }), {})
+                            actionSubject.contramap({ App.Action.counter(it) }), {})
 
                     counterPairView(
                             modelO.map { appModel -> appModel.counterPair },
-                            actionSubject.contramap({ a -> App.Action.counterPair(a) }), {})
+                            actionSubject.contramap({ App.Action.counterPair(it) }), {})
+
+                    counterListView(
+                            modelO.map { it.counterListModelAndAction },
+                            actionSubject.contramap { App.Action.counterList(it) }, {})
                 }
         )
 /*

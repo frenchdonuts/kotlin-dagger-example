@@ -4,12 +4,7 @@ import android.content.Context
 import android.view.ViewManager
 import android.widget.LinearLayout
 import org.jetbrains.anko.AnkoContext
-import org.jetbrains.anko.UI
 import org.jetbrains.anko.custom.ankoView
-import org.jetbrains.anko.textView
-import org.jetbrains.anko.verticalLayout
-import org.loop.example.components.Counter
-import org.loop.example.components.counterView
 import org.loop.example.contramap
 import rx.Observable
 import rx.subjects.PublishSubject
@@ -17,15 +12,15 @@ import rx.subjects.PublishSubject
 /**
  * Created by pamelactan on 12/14/15.
  */
-class Counter_Pair {
+class CounterPair {
+    data class Model(val topCounter: Counter.Model = Counter.Model(),
+                     val botCounter: Counter.Model = Counter.Model())
+
     sealed class Action {
         object Reset : Action()
         class Top(val counterAction: Counter.Action) : Action()
         class Bot(val counterAction: Counter.Action) : Action()
     }
-
-    data class Model(val topCounter: Counter.Model = Counter.Model(),
-                     val botCounter: Counter.Model = Counter.Model())
 
     companion object {
         fun update(action: Action, model: Model): Model {
@@ -59,8 +54,8 @@ class Counter_Pair {
         }
     }
 }
-public inline fun ViewManager.counterPairView(modelO: Observable<Counter_Pair.Model>,
-                                              actionsS: PublishSubject<Counter_Pair.Action>,
-                                              init: Counter_Pair.View.() -> Unit): Counter_Pair.View {
-    return ankoView({ Counter_Pair.View(it, modelO, actionsS) }, init)
+public inline fun ViewManager.counterPairView(modelO: Observable<CounterPair.Model>,
+                                              actionsS: PublishSubject<CounterPair.Action>,
+                                              init: CounterPair.View.() -> Unit): CounterPair.View {
+    return ankoView({ CounterPair.View(it, modelO, actionsS) }, init)
 }
