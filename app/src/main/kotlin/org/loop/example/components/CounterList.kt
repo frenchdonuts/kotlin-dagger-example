@@ -10,6 +10,7 @@ import org.jetbrains.anko.custom.ankoView
 import org.loop.example.contramap
 import rx.Observable
 import rx.subjects.PublishSubject
+import java.util.*
 
 /**
  * Created by pamelactan on 12/18/15.
@@ -17,12 +18,13 @@ import rx.subjects.PublishSubject
 class CounterList {
 
     // TODO: How would we generalize this to work w/ any Model?
-    data class Model(val counters: List<Counter.Model>)
+    data class Model(val counters: List<Counter.Model> = ArrayList(),
+                     val action: Action = Action.Id)
 
     sealed class Action {
         object Id: Action()
-        object Insert: Action()
 
+        class Insert(val pos: Int): Action()
         class Remove(val pos: Int): Action()
         class Modify(val pos: Int, val action: Counter.Action): Action()
         //class Filter(val pred: (Counter.Model) -> Boolean): Action()
@@ -40,6 +42,7 @@ class CounterList {
             }
         }
 
+        // TODO: Insert at a specific position
         private fun insert(m: Model): Model =
                 m.copy(
                         counters = m.counters + Counter.Model()
@@ -80,48 +83,61 @@ class CounterList {
      * For now, do the most basic thing and just make a list of Counters; We can generalize later
      */
     class View (context: Context,
-                val modelAndActionO: Observable<Pair<CounterList.Model, CounterList.Action>>,
                 val actionS: PublishSubject<Action>) : RecyclerView(context) {
+        lateinit var adapter: CounterList.Adapter
         init {
-            adapter = CounterList.Adapter(modelAndActionO, actionS)
+            adapter = CounterList.Adapter(context, actionS)
+        }
+
+        public fun render(m: Model) {
+            adapter.render(m)
         }
 
     }
-    class Adapter(val modelAndActionO: Observable<Pair<Model, Action>>,
+    class Adapter(val context: Context,
                   val actionS: PublishSubject<Action>) : RecyclerView.Adapter<VH>() {
-        var count: Int = 0
+        var items: List<Counter.Model> = ArrayList()
         init {
-            modelAndActionO.subscribe {
-                val (model, action) = it
+            // ???
+        }
 
-                when (action) {
-                    is Action.Id -> //
-                    is Action.Insert -> //
-                    is Action.Modify -> //
-                    is Action.Remove -> //
-                }
+        public fun render(m: Model) {
+            val (items, action) = m
+
+            this.items = items
+
+             when (action) {
+                is Action.Id -> {}
+                is Action.Insert -> notifyItemInserted(action.pos)
+                is Action.Modify -> notifyItemChanged(action.pos)
+                is Action.Remove -> notifyItemRemoved(action.pos)
             }
         }
 
         override fun getItemCount(): Int {
-            throw UnsupportedOperationException()
-        }
-
-        override fun onBindViewHolder(holder: VH?, position: Int) {
-            throw UnsupportedOperationException()
+            return items.size;
         }
 
         override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): VH? {
-            throw UnsupportedOperationException()
+            return VH(Counter.View(context, PublishSubject.create()), actionS)
         }
 
+        override fun onBindViewHolder(holder: VH?, position: Int) {
+            holder?.bind(items.get(position), position)
+        }
     }
 
-    class VH(view: View) : RecyclerView.ViewHolder(view) {}
+    class VH(var view: Counter.View,
+             val actionS: PublishSubject<Action>) : RecyclerView.ViewHolder(view) {
+        public fun bind(m: Counter.Model, pos: Int) {
+            view.render(m)
+            view.setActionsOutput(actionS.contramap { Action.Modify(pos, it) })
+
+        }
+    }
 }
 
-public inline fun ViewManager.counterListView(modelAndActionO: Observable<Pair<CounterList.Model, CounterList.Action>>,
-                                              actionS: PublishSubject<CounterList.Action>,
+public inline fun ViewManager.counterListView(actionS: PublishSubject<CounterList.Action>,
                                               init: CounterList.View.() -> Unit): CounterList.View {
-    return ankoView({ CounterList.View(it, modelAndActionO, actionS) }, init)
+    return ankoView({ CounterList.View(it, actionS) }, init)
 }

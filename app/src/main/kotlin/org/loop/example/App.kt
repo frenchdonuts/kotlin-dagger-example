@@ -19,8 +19,7 @@ class App {
 
     data class Model(val counter: Counter.Model = Counter.Model(),
                      val counterPair: CounterPair.Model = CounterPair.Model(),
-                     val counterListModelAndAction: Pair<CounterList.Model, CounterList.Action> =
-                                                    Pair(CounterList.Model(ArrayList()), CounterList.Action.Id))
+                     val counterList: CounterList.Model = CounterList.Model())
 
     companion object {
         fun update(a: Action, m: Model): Model {
@@ -28,16 +27,8 @@ class App {
                 is Action.Id -> m
                 is Action.counter -> m.copy( counter = Counter.update(a.action, m.counter) )
                 is Action.counterPair -> m.copy( counterPair = CounterPair.update(a.action, m.counterPair) )
-                is Action.counterList -> updateCounterList(a, m)
+                is Action.counterList -> m.copy( counterList = CounterList.update(a.action, m.counterList) )
             }
-        }
-
-        private fun updateCounterList(a: Action.counterList, m: Model): Model {
-            var p = Pair(
-                    CounterList.update(a.action, m.counterListModelAndAction.first),
-                    a.action
-            )
-            return m.copy(counterListModelAndAction = p)
         }
     }
 }

@@ -2,10 +2,12 @@ package org.loop.example.components
 
 import android.content.Context
 import android.view.ViewManager
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import org.jetbrains.anko.*
 import org.jetbrains.anko.custom.ankoView
+import org.loop.example.AEV
 import rx.Observable
 import rx.subjects.PublishSubject
 
@@ -32,34 +34,35 @@ class Counter {
 
 
     class View(context: Context,
-               val modelO: Observable<Model>,
-               val actionsS: PublishSubject<Action>) : LinearLayout(context) {
+               var actionS: PublishSubject<Action>) : LinearLayout(context), AEV<Model, Action> {
         val TAG = View::class.java.simpleName;
-        // How do I get references to the views I create in CounterViewUI?
-        //   Hmmm...getters and setters in CounterViewUI?
-        // How do I make it so that I don't double-nest unnecessary ViewGroups? (This view, and CounterViewUI's verticalLayout)
 
         // Define UI
         private lateinit var tvCounter: TextView
+        private lateinit var btnUp: Button
+        private lateinit var btnDown: Button
         private fun init() = AnkoContext.createDelegate(this).apply {
             button("Up") {
-                onClick {
-                    actionsS.onNext(Action.Up)
-                }
+                onClick { actionS.onNext(Action.Up) }
             }
-            button("Down") {
-                onClick {
-                    actionsS.onNext(Action.Down)
-                }
+
+            btnDown = button("Down") {
+                onClick { actionS.onNext(Action.Down) }
             }
+
             tvCounter = textView("")
         }
 
         init {
             init()
-            modelO.subscribe {
-                tvCounter.text = it.counter.toString()
-            }
+        }
+
+        override public fun render(m: Model) {
+            tvCounter.text = m.counter.toString()
+        }
+
+        override public fun setActionsOutput(actionS: PublishSubject<Action>) {
+            this.actionS = actionS
         }
      }
 
@@ -80,9 +83,8 @@ class Counter {
 
 
 }
-
-public inline fun ViewManager.counterView(modelO: Observable<Counter.Model>,
-                                          actionsS: PublishSubject<Counter.Action>,
+public inline fun ViewManager.counterView() = counterView(PublishSubject.create(), {})
+public inline fun ViewManager.counterView(actionS: PublishSubject<Counter.Action>,
                                           init: Counter.View.() -> Unit): Counter.View {
-    return ankoView({ Counter.View(it, modelO, actionsS) }, init)
+    return ankoView({ Counter.View(it, actionS) }, init)
 }

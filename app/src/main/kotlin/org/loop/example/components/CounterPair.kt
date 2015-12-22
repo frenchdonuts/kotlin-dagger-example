@@ -34,28 +34,39 @@ class CounterPair {
 
 
     class View(context: Context,
-               val modelO: Observable<Model>,
-               val actionsS: PublishSubject<Action>) : LinearLayout(context) {
+               var actionS: PublishSubject<Action>) : LinearLayout(context) {
         val TAG = View::class.java.simpleName
 
+        lateinit var actionSTop: PublishSubject<Counter.Action>
+        lateinit var actionSBot: PublishSubject<Counter.Action>
+
+        lateinit var counterViewTop: Counter.View
+        lateinit var counterViewBot: Counter.View
         private fun init() = AnkoContext.createDelegate(this).apply {
-            counterView(
-                    modelO.map { it.topCounter },
-                    actionsS.contramap({ a -> Action.Top(a) }),
-                    {})
-            counterView(
-                    modelO.map { it.botCounter },
-                    actionsS.contramap({ a -> Action.Bot(a) }),
-                    {})
+            actionSTop = actionS.contramap { Action.Top(it) }
+            actionSBot = actionS.contramap { Action.Bot(it) }
+
+            counterViewTop = counterView(actionSTop, {})
+            counterViewBot = counterView(actionSBot, {})
         }
 
         init {
             init()
         }
+
+        public fun render(m: Model) {
+            counterViewTop.render(m.topCounter)
+            counterViewBot.render(m.botCounter)
+        }
+
+        public fun setActionsOutput(actionS: PublishSubject<Action>) {
+            actionSTop = actionS.contramap { Action.Top(it) }
+            actionSTop = actionS.contramap { Action.Bot(it) }
+        }
     }
 }
-public inline fun ViewManager.counterPairView(modelO: Observable<CounterPair.Model>,
-                                              actionsS: PublishSubject<CounterPair.Action>,
+public inline fun ViewManager.counterPairView() = counterPairView(PublishSubject.create(), {})
+public inline fun ViewManager.counterPairView(actionS: PublishSubject<CounterPair.Action>,
                                               init: CounterPair.View.() -> Unit): CounterPair.View {
-    return ankoView({ CounterPair.View(it, modelO, actionsS) }, init)
+    return ankoView({ CounterPair.View(it, actionS) }, init)
 }
