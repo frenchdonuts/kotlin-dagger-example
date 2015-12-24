@@ -58,6 +58,7 @@ class Counter {
         }
 
         override public fun render(m: Model) {
+            // if (tvCounter.text != m.counter.toString()) ?
             tvCounter.text = m.counter.toString()
         }
 

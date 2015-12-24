@@ -17,3 +17,7 @@ fun <A, B> PublishSubject<A>.contramap(f: (B) -> A): PublishSubject<B> {
     }
     return newPublishSubject
 }
+
+fun <T> List<T>.containsElementAtIndex(i: Int): Boolean {
+    return 0 <= i && i < this.size
+}
