@@ -1,51 +1,37 @@
 package org.loop.example.components
 
-import android.content.Context
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.util.Log
-import android.view.View
-import android.view.ViewGroup
-import android.view.ViewManager
-import org.jetbrains.anko.AnkoContext
-import org.jetbrains.anko.custom.ankoView
 import org.loop.example.containsElementAtIndex
-import org.loop.example.contramap
-import rx.Observable
-import rx.subjects.PublishSubject
-import java.util.*
 
 /**
- * Created by pamelactan on 12/18/15.
+ * Created by pamelactan on 12/26/15.
  */
-class CounterList {
+class AECList {
 
-    // TODO: How would we generalize this to work w/ any Model?
-    data class Model(val counters: List<Counter.Model> = ArrayList(),
-                     val action: Action = Action.Id)
+    data class Model<CM>(val items: List<CM> = arrayListOf(),
+                         val action: Action = Action.Id)
 
     sealed class Action {
         object Id: Action()
 
-        class Insert(val pos: Int): Action()
-        class Remove(val pos: Int): Action()
-        class Modify(val pos: Int, val action: Counter.Action): Action()
+        class Insert<CM>(val model: CM, val pos: Int): Action()
+        class Remove<CM>(val model: CM, val pos: Int): Action()
+        class Modify<CA>(val pos: Int, val action: CA): Action()
 
     }
 
     companion object {
-        fun update(a: Action, m: Model): Model {
+        fun <CA, CM> update(a: Action, m: Model<CM>): Model<CM> {
             return when (a) {
                 is Action.Id -> m
-                is Action.Insert -> insert(a, m)
-                is Action.Remove -> if (m.counters.containsElementAtIndex(a.pos)) remove(a, m) else m
-                is Action.Modify -> if (m.counters.containsElementAtIndex(a.pos)) modify(a, m) else m
+                is Action.Insert<*> -> insert(a, m)
+                is Action.Remove<*> -> if (m.items.containsElementAtIndex(a.pos)) remove(a, m) else m
+                is Action.Modify<*> -> if (m.items.containsElementAtIndex(a.pos)) modify(a, m) else m
             }
         }
 
-        private fun insert(a: Action.Insert, m: Model): Model =
+        private fun <CM> insert(a: Action.Insert<CM>, m: Model<CM>): Model<CM> =
                 m.copy( // TODO: Insert at specific position
-                        counters = m.counters + Counter.Model(),
+                        items = m.items + Counter.Model(),
                         action = Action.Insert(a.pos)
                 )
 
@@ -105,9 +91,4 @@ class CounterList {
 
         }
     }
-}
-
-public inline fun ViewManager.counterListView(actionS: PublishSubject<CounterList.Action>,
-                                              init: CounterList.View.() -> Unit): CounterList.View {
-    return ankoView({ CounterList.View(it, actionS) }, init)
 }

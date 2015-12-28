@@ -61,6 +61,7 @@ public class MainActivity : AppCompatActivity() {
 
                     val counterListView = counterListView(actionSubject.contramap { App.Action.counterList(it) }, {})//.lparams(width = matchParent, height = dip(50))
 
+
                     modelO.subscribe {
                         // Should I put equality checks in the render methods?
                         counterView.render(it.counter)

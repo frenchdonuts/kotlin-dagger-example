@@ -34,7 +34,7 @@ class Counter {
 
 
     class View(context: Context,
-               var actionS: PublishSubject<Action>) : LinearLayout(context), AEV<Model, Action> {
+               var actionS: PublishSubject<Action> = PublishSubject.create()) : LinearLayout(context), AEV<Model, Action> {
         val TAG = View::class.java.simpleName;
 
         // Define UI
