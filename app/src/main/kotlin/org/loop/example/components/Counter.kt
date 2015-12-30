@@ -34,19 +34,16 @@ class Counter {
 
 
     class View(context: Context,
-               var actionS: PublishSubject<Action> = PublishSubject.create()) : LinearLayout(context), AEV<Model, Action> {
-        val TAG = View::class.java.simpleName;
-
+               var actionS: PublishSubject<Action> = PublishSubject.create()) : LinearLayout(context),
+                                                                                AECView<Action, Model> {
         // Define UI
         private lateinit var tvCounter: TextView
-        private lateinit var btnUp: Button
-        private lateinit var btnDown: Button
         private fun init() = AnkoContext.createDelegate(this).apply {
             button("Up") {
                 onClick { actionS.onNext(Action.Up) }
             }
 
-            btnDown = button("Down") {
+            button("Down") {
                 onClick { actionS.onNext(Action.Down) }
             }
 
@@ -57,12 +54,12 @@ class Counter {
             init()
         }
 
-        override public fun render(m: Model) {
+        override fun render(m: Model) {
             // if (tvCounter.text != m.counter.toString()) ?
             tvCounter.text = m.counter.toString()
         }
 
-        override public fun setActionsOutput(actionS: PublishSubject<Action>) {
+        override fun setActionStream(actionS: PublishSubject<Action>) {
             this.actionS = actionS
         }
      }

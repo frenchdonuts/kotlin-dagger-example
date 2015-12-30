@@ -7,5 +7,5 @@ import rx.subjects.PublishSubject
  */
 interface AECView<Action, Model> {
     fun render(m: Model): Unit
-    fun setActionS(actionS: PublishSubject<Action>): Unit
+    fun setActionStream(actionS: PublishSubject<Action>): Unit
 }

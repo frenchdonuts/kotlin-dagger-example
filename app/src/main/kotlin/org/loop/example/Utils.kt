@@ -21,3 +21,10 @@ fun <A, B> PublishSubject<A>.contramap(f: (B) -> A): PublishSubject<B> {
 fun <T> List<T>.containsElementAtIndex(i: Int): Boolean {
     return 0 <= i && i < this.size
 }
+
+fun <T> List<T>.insert(x: T, index: Int): List<T> {
+    return this.mapIndexed { i, t ->
+        if (i == index) listOf(x, t)
+        else listOf(t)
+    }.flatten()
+}

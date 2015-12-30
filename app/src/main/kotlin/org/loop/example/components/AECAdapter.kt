@@ -7,7 +7,9 @@ import android.view.ViewGroup
 /**
  * Created by pamelactan on 12/24/15.
  */
-class AECAdapter<A, CM, VH : AECViewHolder<A, CM>>(val aecListView: AECListView<VH>) : RecyclerView.Adapter<VH>() {
+class AECAdapter<A, CA, CM, V, VH : AECViewHolder<A, CA, CM, V>>(
+        val aecListView: AECListView<VH>) : RecyclerView.Adapter<VH>()
+        where V : android.view.View, V : AECView<CA, CM> {
     sealed class Action {
         object Id : Action()
         object Init: Action()
